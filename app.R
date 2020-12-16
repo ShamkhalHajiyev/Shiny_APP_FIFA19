@@ -1,42 +1,91 @@
 # 1. PACKAGES -------------------------------------------------------------
 source("Packages/packages.R")
 
-    
+
+# 2. GLOBAL -------------------------------------------------------------
+source("Global/Global.R")
 
 
 
+# User Interface
+ui <-
+    navbarPage("Fifa Visualization",
+               ###Player Tab
+               tabPanel(
+                   "Player",
+                   fluidRow(
+                       
+                       column(
+                           width = 2,
+                           boxPad(h2("Main Player")),
+                           pickerInput("tp_league", "League:", choices = ""),
+                           pickerInput("tp_team", "Team:", choices =""),
+                           pickerInput("tp_player", "Player:", choices ="")
+                           
+                       ),
+                       
+                       column(
+                           width = 8,
+                           fluidRow(
+                               column(width = 4),
+                               column(width = 2, uiOutput("PlayerImg")), 
+                               column(width = 4)
+                           ),
+                           
+                           br(),
+                           
+                           column(offset = 1, width = 12,
+                                  fluidRow(
+                                      valueBoxOutput("tp_age",width = 3),
+                                      valueBoxOutput("tp_overall",width = 2),
+                                      valueBoxOutput("tp_value",width = 2),
+                                      valueBoxOutput("tp_contract",width = 3)
+                                  )
+                           )
+                           
+                       ),
+                       
+                       column(
+                           width = 2, 
+                           boxPad(
+                               h2("Find Compare Players")),
+                           pickerInput("tp_league2", "League:", choices = ""),
+                           pickerInput("tp_team2", "Team:", choices =""),
+                           sliderInput(
+                               "overall",
+                               "Overall:",
+                               min = 50,
+                               max = 100,
+                               value = c(50, 100)
+                           ),
+                           sliderInput(
+                               "height",
+                               "Height (cm):",
+                               min = 155,
+                               max = 203,
+                               value = c(155, 203)
+                           ),
+                           submitButton("Search")
+                       )
+                   ),
+                   
+                   tags$hr(),
+                   tags$br(),
+                   
+                   conditionalPanel(
+                       condition = "input.start",
+                       
+                       column(
+                           width = 12, 
+                           withSpinner(plotlyOutput("tp_radar"))
+                           
+                       )
+                   )
+               ))
 
 
-library(shiny)
-
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
-
-
-
-
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+# Server
+server <- function(input, output, session) {
 
     output$distPlot <- renderPlot({
         # generate bins based on input$bins from ui.R
