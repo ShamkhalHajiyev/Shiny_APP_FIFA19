@@ -1,30 +1,5 @@
-###Packages 
-
-pacotes = c("shiny", "shinydashboard", "shinythemes", "plotly", "shinycssloaders","tidyverse",
-            "scales", "knitr", "kableExtra", "ggfortify","dplyr","plotly","FNN")
-
-# Run the following command to verify that the required packages are installed. If some package
-# is missing, it will be installed automatically
-
-package.check <- lapply(pacotes, FUN = function(x) {
-  if (!require(x, character.only = TRUE)) {
-    install.packages(x, dependencies = TRUE)
-  }
-})
-
-
-
-library(tidyverse) 
-library(magrittr)
-library(maps)
-library(plotly)
-library(DT)
-library(tidytext)
-library(gridExtra)
-library(factoextra)
-
-###Data 
-fifa19 <- read.csv2("data/fifa2019.csv", sep  = ",")
+###Data
+fifa19 <- read.csv2("Data/fifa2019.csv", sep  = ",")
 
 
 head(fifa19)
@@ -35,9 +10,9 @@ row.has.na <- apply(fifa19, 1, function(x){any(is.na(x))})
 
 sum(row.has.na)
 
-fifa19_updated <- fifa19[!row.has.na,]
+md <- fifa19[!row.has.na,]
 
-sort(colSums(is.na(fifa19_updated)))
+sort(colSums(is.na(md)))
 
 ### Creating the Leagues
 
@@ -83,7 +58,7 @@ ligue1 <- c(
 
 
 
-fifa19_updated %<>% mutate(
+md %<>% mutate(
   League = case_when(
     Club %in% bundesliga ~ "Bundesliga",
     Club %in% premierLeague ~ "Premier League",
@@ -105,38 +80,38 @@ rm(bundesliga, premierLeague, laliga, seriea, ligue1)
 
 
 
-str(fifa19_updated)
+str(md)
 
-### columns to drop == Photo, Flag, Club.Logo, Loaned.From, Work.Rate
+### columns to drop 
 
-fifa19_updated %<>% select(-ID, -Body.Type, -Real.Face, -Joined, -Loaned.From, -Photo, -Flag, -Special, -Work.Rate, -Club.Logo, -Release.Clause)
+md %<>% select(-ID, -Body.Type, -Real.Face, -Joined, -Loaned.From, -Photo, -Flag, -Special, -Work.Rate, -Club.Logo, -Release.Clause)
 
-### columns to be factor == Preferred.Foot, Work.Rate
+
 
 
 ### Height and Weight variables convert cm and kg units.
 
-fifa19_updated %<>%
+md %<>%
   mutate(Height = round((as.numeric(str_sub(Height, start=1,end = 1))*30.48) + (as.numeric(str_sub(Height, start = 3, end = 5))* 2.54)),
          Weight = round(as.numeric(str_sub(Weight, start = 1, end = 3)) / 2.204623))
 
 ### Correction of the Preferred Foot Variable.
 
-fifa19_updated %<>% filter(Preferred.Foot %in% c("Left", "Right")) 
-fifa19_updated$Preferred.Foot <- as.factor(as.character(fifa19_updated$Preferred.Foot))
-fifa19_updated <- fifa19_updated[!grepl("K", fifa19_updated$Value),]
+md %<>% filter(Preferred.Foot %in% c("Left", "Right")) 
+md$Preferred.Foot <- as.factor(as.character(md$Preferred.Foot))
+md <- md[!grepl("K", md$Value),]
+md$Value <- as.numeric(unlist(regmatches(md$Value, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",md$Value)))) 
+md <- md[md$Value >= 1, ]
+md$Wage <- as.numeric(unlist(regmatches(md$Wage, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",md$Wage)))) 
 
 
+# Create Position Class #
+defence <- c("CB", "RB", "LB", "LWB", "RWB", "LCB", "RCB")
+midfielder <- c("CM", "CDM","CAM","LM","RM", "LAM", "RAM", "LCM", "RCM", "LDM", "RDM")
 
-head(fifa19_updated$Value)
-fifa19_updated$Value <- as.numeric(unlist(regmatches(fifa19_updated$Value, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",fifa19_updated$Value)))) 
-fifa19_updated <- fifa19_updated[fifa19_updated$Value >= 1, ]
+md %<>% mutate(Class = if_else(Position %in% "GK", "Goal Keeper",
+                                 if_else(Position %in% defence, "Defender",
+                                         if_else(Position %in% midfielder, "Midfielder", "Forward"))))
 
-
-head(fifa19_updated$Wage)
-fifa19_updated$Wage <- as.numeric(unlist(regmatches(fifa19_updated$Wage, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",fifa19_updated$Wage)))) 
-
-
-
-str(fifa19_updated)
+rm(defence, midfielder)
 

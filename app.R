@@ -9,7 +9,7 @@ source("Global/Global.R")
 
 # User Interface
 ui <-
-    navbarPage("Fifa Visualization",
+    navbarPage("FIFA Visualization",
                ###Player Tab
                tabPanel(
                    "Player",
@@ -86,15 +86,13 @@ ui <-
 
 # Server
 server <- function(input, output, session) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
+    # Player Tab
+    # Reactive
+    
+    rvPlayer <- reactiveValues(League = NULL, Team = NULL, Player = NULL,
+                               League2 = NULL, Team2 = NULL, Player2 = NULL)
+    
+  
 }
 
 # Run the application 
