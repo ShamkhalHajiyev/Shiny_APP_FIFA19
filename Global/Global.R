@@ -1,18 +1,10 @@
+
 ###Data
+
 fifa19 <- read.csv2("Data/fifa2019.csv", sep  = ",")
-
-
-head(fifa19)
-
-sort(colSums(is.na(fifa19)))
-
 row.has.na <- apply(fifa19, 1, function(x){any(is.na(x))})
-
-sum(row.has.na)
-
 md <- fifa19[!row.has.na,]
 
-sort(colSums(is.na(md)))
 
 ### Creating the Leagues
 
@@ -76,11 +68,9 @@ md %<>% mutate(
 ) %>% filter(!is.na(League)) %>% mutate_if(is.factor, as.character)
 
 
-rm(bundesliga, premierLeague, laliga, seriea, ligue1)
+rm(bundesliga, premierLeague, laliga, seriea, ligue1, row.has.na)
 
 
-
-str(md)
 
 ### columns to drop 
 
@@ -114,4 +104,8 @@ md %<>% mutate(Class = if_else(Position %in% "GK", "Goal Keeper",
                                          if_else(Position %in% midfielder, "Midfielder", "Forward"))))
 
 rm(defence, midfielder)
+
+md$value_currency <- paste("???", md$Value, "M")
+md$wage_currency <- paste("???", md$Wage, "K")
+write.csv(md,'md.csv')
 

@@ -1,7 +1,3 @@
-# Description -------------------------------------------------------------
-
-# This R file contains the R libraries.
-
 #shiny libraries
 suppressMessages(library(shiny))
 suppressMessages(library(shinydashboard))
@@ -32,5 +28,4 @@ suppressMessages(library(magick))
 
 suppressMessages(library(rsconnect))
 suppressMessages(library(rmarkdown))
-
 
