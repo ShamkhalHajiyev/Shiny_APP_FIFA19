@@ -1,55 +1,139 @@
 function(input, output, session) {
- 
-    observeEvent(input$tp_league, {
+    ########## Compare Players
+    observeEvent(input$league1, {
         
-        clubs <- md %>%
-            filter(League == input$tp_league)%>%
+        clubs1 <- md %>%
+            filter(League == input$league1)%>%
             pull(Club) 
         
         
-        clubs_updated = sort(unique(clubs))
+        clubs_updated1 = sort(unique(clubs1))
         
         
         updatePickerInput(session,
-                          inputId = "tp_team",
-                          choices =  clubs_updated,
-                          selected = clubs_updated[1])
+                          inputId = "team1",
+                          choices =  clubs_updated1,
+                          selected = clubs_updated1[1])
+    })
+    observeEvent(input$league2, {
+        
+        clubs2 <- md %>%
+            filter(League == input$league2)%>%
+            pull(Club) 
+        
+        
+        clubs_updated2 = sort(unique(clubs2))
+        
+        
+        updatePickerInput(session,
+                          inputId = "team2",
+                          choices =  clubs_updated2,
+                          selected = clubs_updated2[1])
     })
     
-    observeEvent(input$tp_team, {
+    observeEvent(input$team1, {
         
-        clubs <- md %>%
-            filter(League == input$tp_league & Club == input$tp_team)%>%
+        clubs1 <- md %>%
+            filter(League == input$league1 & Club == input$team1)%>%
             pull(Name) 
         
         
-        players = sort(unique(clubs))
+        players1 = sort(unique(clubs1))
         
         
         updatePickerInput(session,
-                          inputId = "tp_player",
-                          choices =  players,
-                          selected = players[1])
+                          inputId = "player1",
+                          choices =  players1,
+                          selected = players1[1])
         
     })
-    output$tp_age <- renderValueBox({
-        valueBox("Age", md$Age[md$Name == input$tp_player])
+    
+    observeEvent(input$team2, {
+        
+        clubs2 <- md %>%
+            filter(League == input$league2 & Club == input$team2)%>%
+            pull(Name) 
+        
+        
+        players2 = sort(unique(clubs2))
+        
+        
+        updatePickerInput(session,
+                          inputId = "player2",
+                          choices =  players2,
+                          selected = players2[1])
+        
     })
-    output$tp_nationality <- renderValueBox({
-        valueBox("Nationality", md$Nationality[md$Name == input$tp_player])
+    
+    output$age1 <- renderValueBox({
+        valueBox("Age", md$Age[md$Name == input$player1])
     })
-    output$tp_overall <- renderValueBox({
-        valueBox("Overall", md$Overall[md$Name == input$tp_player])
+    output$age2 <- renderValueBox({
+        valueBox("Age", md$Age[md$Name == input$player2])
     })
-    output$tp_value <- renderValueBox({
-        valueBox("Value", md$value_currency[md$Name == input$tp_player])
+    output$height1 <- renderValueBox({
+        valueBox("Height cm", md$Height[md$Name == input$player1])
     })
-    output$tp_contract <- renderValueBox({
-        valueBox("Contract", md$Contract.Valid.Until[md$Name == input$tp_player])
+    output$height2 <- renderValueBox({
+        valueBox("Height cm", md$Height[md$Name == input$player2])
+    })
+    output$weight1 <- renderValueBox({
+        valueBox("Weight kg", md$Weight[md$Name == input$player1])
+    })
+    output$weight2 <- renderValueBox({
+        valueBox("Weight kg", md$Weight[md$Name == input$player2])
+    })
+    output$nationality1 <- renderValueBox({
+        valueBox("Nationality", md$Nationality[md$Name == input$player1])
+    })
+    output$nationality2 <- renderValueBox({
+        valueBox("Nationality", md$Nationality[md$Name == input$player2])
+    })
+    output$overall1 <- renderValueBox({
+        valueBox("Overall", md$Overall[md$Name == input$player1])
+    })
+    output$overall2 <- renderValueBox({
+        valueBox("Overall", md$Overall[md$Name == input$player2])
+    })
+    output$value1 <- renderValueBox({
+        valueBox("Value", md$value_currency[md$Name == input$player1])
+    })
+    output$value2 <- renderValueBox({
+        valueBox("Value", md$value_currency[md$Name == input$player2])
+    })
+    output$wage1 <- renderValueBox({
+        valueBox("Wage", md$wage_currency[md$Name == input$player1])
+    })
+    output$wage2 <- renderValueBox({
+        valueBox("Wage", md$wage_currency[md$Name == input$player2])
+    })
+    output$preferredleg1 <- renderValueBox({
+        valueBox("Preferred Foot", md$Preferred.Foot[md$Name == input$player1])
+    })
+    output$preferredleg2 <- renderValueBox({
+        valueBox("Preferred Foot", md$Preferred.Foot[md$Name == input$player2])
+    })
+    output$position1 <- renderValueBox({
+        valueBox("Position", md$Position[md$Name == input$player1])
+    })
+    output$position2 <- renderValueBox({
+        valueBox("Position", md$Position[md$Name == input$player2])
+    })
+    output$class1 <- renderValueBox({
+        valueBox("Class", md$Class[md$Name == input$player1])
+    })
+    output$class2 <- renderValueBox({
+        valueBox("Class", md$Class[md$Name == input$player2])
+    })
+    output$contract1 <- renderValueBox({
+        valueBox("Contract", md$Contract.Valid.Until[md$Name == input$player1])
+    })
+    output$contract2 <- renderValueBox({
+        valueBox("Contract", md$Contract.Valid.Until[md$Name == input$player2])
     })
     
     
-    output$tp_radar <- renderPlotly({
+    output$radarplayers <- renderPlotly({
         radar <- md %>%
             transmute(
                 Name,
@@ -60,32 +144,41 @@ function(input, output, session) {
                 Technic = (BallControl + Dribbling + Vision) / 3,
                 Attack = (Finishing + ShotPower + LongShots + Curve) / 4,
                 Defence = (Marking + StandingTackle + SlidingTackle) / 3
-            ) %>%
-            filter(md$Name == input$tp_player)
-        
+            ) 
+        radarP1 <- radar %>% filter(Name %in% input$player1)
+        radarP2 <- radar %>% filter(Name %in% input$player2)
         
         plot_ly(type = 'scatterpolar',
                 fill = 'toself') %>%
             add_trace(
-                r = c(
-                    radar %>% pull(Speed),
-                    radar %>% pull(Power),
-                    radar %>% pull(Technic),
-                    radar %>% pull(Attack),
-                    radar %>% pull(Defence)
-                ),
+                r = c(radarP1 %>% pull(Speed),radarP1 %>% pull(Power), radarP1 %>% pull(Technic), radarP1 %>% pull(Attack), radarP1 %>% pull(Defence)),
                 theta = c('Speed', 'Power', 'Technic', 'Attack', 'Defence'),
-                name = input$tp_player
+                name = input$player1
+            ) %>%
+            add_trace(
+                r = c(radarP2 %>% pull(Speed),radarP2 %>% pull(Power), radarP2 %>% pull(Technic), radarP2 %>% pull(Attack), radarP2 %>% pull(Defence)),
+                theta = c('Speed','Power','Technic', 'Attack', 'Defence'),
+                name = input$player2
             ) %>%
             layout(polar = list(radialaxis = list(
                 visible = T,
                 range = c(0, 100)
             )))
         
-        
     })
     
-    
+    output$histogramplayers <- renderPlot({
+        bar <- rbind(md[md$Name == input$player1, c(47:80)], md[md$Name==input$player2, c(47:80)]) 
+        ggplot(aes(Skill, Exp))+
+            geom_col(fill = fill_variable)+
+            coord_flip()+
+            theme_minimal()+
+            facet_wrap(~(df %>% pull(`Name.Pos`)))+
+            labs(x = NULL, y = "Ability")+
+            theme(strip.background =element_rect(fill=fill_strip,color = "black"),
+                  strip.text.x = element_text(size = 10, colour = "white",face = "bold.italic"))
+        
+    })
     
     
 }

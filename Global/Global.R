@@ -109,3 +109,5 @@ md$value_currency <- paste("???", md$Value, "M")
 md$wage_currency <- paste("???", md$Wage, "K")
 write.csv(md,'md.csv')
 
+bar <- rbind(md[md$Name == 'L. Messi', c(47:80)], md[md$Name=="Neymar Jr", c(47:80)]) 
+
