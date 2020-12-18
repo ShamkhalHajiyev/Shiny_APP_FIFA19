@@ -184,38 +184,7 @@ function(input, output, session) {
   })
   
   
-  facetReactiveBar = function(df, fill_variable, fill_strip) {
-    res <- NULL
-    
-    if (missing("df") |
-        missing("fill_variable") | missing("fill_strip"))
-      return(res)
-    if (is.null(df) |
-        is.null(fill_variable) | is.null("fill_strip"))
-      return(res)
-    
-    
-    res <- df %>%
-      select(Name, Crossing:SlidingTackle) %>%
-      rename_all(funs(gsub("[[:punct:]]", " ", .))) %>%
-      gather(Exp, Skill, Crossing:`SlidingTackle`, -`Name`) %>%
-      ggplot(aes(Exp, Skill)) +
-      geom_col(fill = fill_variable) +
-      facet_wrap(~ (df %>% pull(`Name`))) +
-      labs(x = NULL, y = NULL) +
-      theme(
-        strip.background = element_rect(fill = fill_strip, color = "black"),
-        strip.text.x = element_text(
-          size = 10,
-          colour = "white",
-          face = "bold.italic"
-        ),
-        axis.text.x = element_text(angle = 90)
-      )
-    
-    return(res)
-    
-  }
+
   
   
   output$histogramplayer1 <- renderPlotly({
@@ -255,70 +224,14 @@ function(input, output, session) {
                  })
                  
                  
-                 bestLeague <-
-                   md %>% filter(League %in% input$leagues)
+
                  
-                 best_team <- function(df, input) {
-                   team <- NULL
-                   team <- tibble()
-                   team_copy <-
-                     df %>% select(Jersey.Number, Name, Overall, Position, Club) %>% arrange(-Overall)
-                   
-                   tac4231 <-
-                     c("GK",
-                       "RB",
-                       "CB",
-                       "CB",
-                       "LB",
-                       "CM",
-                       "CM",
-                       "AM",
-                       "LW",
-                       "RW",
-                       "CF")
-                   tac352 <-
-                     c("GK",
-                       "CB",
-                       "CB",
-                       "CB",
-                       "RM",
-                       "CM",
-                       "CM",
-                       "CM",
-                       "LM",
-                       "ST",
-                       "ST")
-                   tac433 <-
-                     c("GK",
-                       "RB",
-                       "CB",
-                       "CB",
-                       "LB",
-                       "CM",
-                       "CDM",
-                       "CM",
-                       "LW",
-                       "RW",
-                       "ST")
-                   
-                   tactic <- if (input == "4-2-3-1") {
-                     tac4231
-                   } else if (input == "3-5-2") {
-                     tac352
-                   } else{
-                     tac433
-                   }
-                   
-                   for (i in tactic) {
-                     team %<>%  bind_rows(team_copy %>% filter(Position %in% i) %>% head(1))
-                     team_copy %<>% filter(!Name %in% (team %>% pull(Name)))
-                     
-                   }
-                   
-                   return(team)
-                   
-                 }
+
                  output$best_team <- renderTable({
+                   bestLeague <-
+                     md %>% filter(League %in% input$leagues)
+                   
+                   
                    leagueTeam <- best_team(bestLeague, input = input$leaguetactic)
                    
                    leagueTeam %>%
@@ -373,18 +286,19 @@ function(input, output, session) {
                  
   
                  output$league_players <- renderPlotly({
+                   
+                   
+                   md_league_players <-md %>%
+                     filter(League %in% input$leagues & Class %in% input$leagueclass) %>%
+                     mutate(Name = reorder(Name, Value)) %>%
+                     group_by(Class) %>% 
+                     top_n(n = 20, wt = Value)
+                   
                    ggplotly(
-                     md %>%
-                       filter(League == input$leagues & Class == input$leagueclass) %>%
-                       arrange(-Value) %>%
-                       mutate(Name = reorder(Name, Value)) %>% 
-                       top_n(n = 10, wt = Value) %>%
-                       ggplot(aes(
-                         Value,
-                         Name,
-                         group = Class
-                       )) +
-                       geom_line() +
+                       ggplot(md_league_players, aes(Value,
+                                  Name,
+                                  size = Overall,
+                                  color = Position)) +
                        geom_point() +
                        facet_wrap(Class ~ ., scales = "free") +
                        theme(
@@ -395,7 +309,8 @@ function(input, output, session) {
                            face = "bold.italic"
                          )
                        ) +
-                       theme_minimal() + labs(title = "Most Valuable Players", x = "Million ???", y = NULL)
+                       theme_minimal() + labs(title = "Most Valuable Players", x = "Million €", y = NULL
+                       )
                    )
                    
                  })

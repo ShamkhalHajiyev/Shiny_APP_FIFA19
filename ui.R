@@ -2,7 +2,7 @@ source("Global/Global1.R")
 
 source("Libraries/Library.R")
 
-
+source("Functions/Functions.R")
 
 
 shinyUI(fluidPage(navbarPage(
@@ -125,13 +125,13 @@ shinyUI(fluidPage(navbarPage(
                                inline = TRUE
                            ),
                            tags$br(),
-                               withSpinner(plotOutput(outputId = "league_players"))
+                           withSpinner(plotlyOutput(outputId = "league_players"))
                        ),
                        tabPanel("Comparison",
                                 tags$br(),
                                 pickerInput("comp_league", choices = c("League", "Team", "Position")),
                                 br(),
-                                withSpinner(plotOutput("league_comp1"))
+                                withSpinner(plotlyOutput("league_comp"))
                                 )
                    ))
         )), 
