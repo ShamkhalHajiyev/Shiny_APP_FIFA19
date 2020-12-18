@@ -1,7 +1,6 @@
 
 ###Data
-
-fifa19 <- read.csv2("Data/fifa2019.csv", sep  = ",")
+fifa19 <- read.csv2("C:/Users/hajiy/Desktop/Fifa_19_Project/Data/fifa2019.csv", sep  = ",")
 row.has.na <- apply(fifa19, 1, function(x){any(is.na(x))})
 md <- fifa19[!row.has.na,]
 
@@ -109,5 +108,16 @@ md$value_currency <- paste("???", md$Value, "M")
 md$wage_currency <- paste("???", md$Wage, "K")
 write.csv(md,'md.csv')
 
-bar <- rbind(md[md$Name == 'L. Messi', c(47:80)], md[md$Name=="Neymar Jr", c(47:80)]) 
 
+
+Player1 <- md %>% 
+  filter(md$Name == 'L. Messi')
+
+Player2 <- md %>% 
+  filter(md$Name=="Neymar Jr")
+
+
+bar <- rbind(Player1, Player2)  %>% 
+  select(Name, Crossing:SlidingTackle) %>% 
+  rename_all(funs(gsub("[[:punct:]]", " ", .))) %>% 
+  gather(Skill, Exp, Crossing:`SlidingTackle`, -`Name`)

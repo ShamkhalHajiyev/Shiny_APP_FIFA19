@@ -61,7 +61,7 @@ function(input, output, session) {
         updatePickerInput(session,
                           inputId = "player2",
                           choices =  players2,
-                          selected = players2[1])
+                          selected = players2[2])
         
     })
     
@@ -149,7 +149,7 @@ function(input, output, session) {
         radarP2 <- radar %>% filter(Name %in% input$player2)
         
         plot_ly(type = 'scatterpolar',
-                fill = 'toself') %>%
+                fill = 'toself')%>%
             add_trace(
                 r = c(radarP1 %>% pull(Speed),radarP1 %>% pull(Power), radarP1 %>% pull(Technic), radarP1 %>% pull(Attack), radarP1 %>% pull(Defence)),
                 theta = c('Speed', 'Power', 'Technic', 'Attack', 'Defence'),
@@ -166,19 +166,48 @@ function(input, output, session) {
             )))
         
     })
-    
-    output$histogramplayers <- renderPlot({
-        bar <- rbind(md[md$Name == input$player1, c(47:80)], md[md$Name==input$player2, c(47:80)]) 
-        ggplot(aes(Skill, Exp))+
+
+  
+    facetReactiveBar = function(df, fill_variable, fill_strip){
+        
+        res <- NULL
+        
+        if(missing("df") | missing("fill_variable") | missing("fill_strip")) return(res)
+        if(is.null(df) | is.null(fill_variable) | is.null("fill_strip")) return(res)
+        
+        
+        res <- df %>% 
+            select(Name, Crossing:SlidingTackle) %>% 
+            rename_all(funs(gsub("[[:punct:]]", " ", .))) %>% 
+            gather(Exp, Skill, Crossing:`SlidingTackle`, -`Name`) %>% 
+            ggplot(aes(Exp, Skill))+
             geom_col(fill = fill_variable)+
-            coord_flip()+
-            theme_minimal()+
-            facet_wrap(~(df %>% pull(`Name.Pos`)))+
-            labs(x = NULL, y = "Ability")+
+            facet_wrap(~(df %>% pull(`Name`)))+
+            labs(x = NULL, y = NULL)+
             theme(strip.background =element_rect(fill=fill_strip,color = "black"),
-                  strip.text.x = element_text(size = 10, colour = "white",face = "bold.italic"))
+                  strip.text.x = element_text(size = 10, colour = "white",face = "bold.italic"),
+                  axis.text.x=element_text(angle=90))
+        
+        return(res)
+        
+    }    
+
+    
+    output$histogramplayer1 <- renderPlotly({
+        ds_p1 <- md %>% filter(Name %in% input$player1)
+        facetReactiveBar(ds_p1, fill_variable = "#dd4b39", fill_strip = "firebrick")
+        
         
     })
+    output$histogramplayer2 <- renderPlotly({
+        ds_p2 <- md %>% filter(Name %in% input$player2)
+        facetReactiveBar(ds_p2, fill_variable = "royalblue", fill_strip = "navy")
+        
+    })
+    
+    ### Compare League
+
+    
     
     
 }
