@@ -205,8 +205,36 @@ function(input, output, session) {
         
     })
     
-    ### Compare League
-
+    ### League Stats
+    observeEvent(
+      input$leagues,
+      {
+  
+        output$values <- renderValueBox({
+          valueBox(
+            color = "orange",
+            value = md %>% filter(League %in% input$leagues) %>%
+              summarise(total = paste0("€", sum(Value), "M")) %>% pull(total),
+            subtitle = "Total League Value"
+          )
+          
+        })
+        output$numofplayers <- renderValueBox({
+          valueBox(
+            color = "orange",
+            value = md %>% filter(League %in% input$leagues) %>% select(Club) %>% nrow(),
+            subtitle = "Number of Players"
+          )
+        })
+        
+        output$teams <- renderValueBox({
+          valueBox(
+            value = md %>% filter(League %in% input$leagues) %>% select(Club) %>% distinct() %>% nrow(),
+            "Number of Teams"
+          )
+        })
+      
+    })
     
     
     

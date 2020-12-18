@@ -69,10 +69,35 @@ shinyUI(fluidPage(
                      )
                  )),
         tabPanel("League Stats",
-                 fluidRow(column(width = 6,
-                                 pickerInput("leagues", "Please select the League:", choices = sort(unique(md$League))),
-                                 disabled(actionBttn("selectleague", "Select", style = "simple", block = T))),
-                 fluidRow()),
+                 fluidRow(
+                     column(
+                         width = 6,
+                         pickerInput("leagues", "Please select the League:", choices = sort(unique(md$League))),
+                        br(),
+                             fluidRow(
+                                 valueBoxOutput("values"),
+                                 valueBoxOutput("numofplayers"),
+                                 valueBoxOutput("teams")
+                             )
+                         
+                     ),
+                     column(
+                         width = 10,
+                         conditionalPanel(
+                             condition = "output.value",
+                             prettyRadioButtons(
+                                 inputId = "leaguetactic",
+                                 label = "Best Players in The League in terms of Tactics:",
+                                 choices = c("4-4-2", "3-5-2", "4-3-3"),
+                                 shape = "curve",
+                                 status = "success",
+                                 inline = TRUE
+                             )
+                             ,
+                             withSpinner(tableOutput("best_team"))
+                         )
+                     )
+                 )),
         navbarMenu(
             "More",
             tabPanel("Developers",

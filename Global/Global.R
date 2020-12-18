@@ -104,20 +104,8 @@ md %<>% mutate(Class = if_else(Position %in% "GK", "Goal Keeper",
 
 rm(defence, midfielder)
 
-md$value_currency <- paste("???", md$Value, "M")
-md$wage_currency <- paste("???", md$Wage, "K")
+md$value_currency <- paste("€", md$Value, "M")
+md$wage_currency <- paste("€", md$Wage, "K")
 write.csv(md,'md.csv')
 
 
-
-Player1 <- md %>% 
-  filter(md$Name == 'L. Messi')
-
-Player2 <- md %>% 
-  filter(md$Name=="Neymar Jr")
-
-
-bar <- rbind(Player1, Player2)  %>% 
-  select(Name, Crossing:SlidingTackle) %>% 
-  rename_all(funs(gsub("[[:punct:]]", " ", .))) %>% 
-  gather(Skill, Exp, Crossing:`SlidingTackle`, -`Name`)
