@@ -206,7 +206,7 @@ function(input, output, session) {
                    valueBox(
                      "Total value of league",
                      value = md %>% filter(League %in% input$leagues) %>%
-                       summarise(total = paste("€", sum(Value), "M")) %>% pull(total)
+                       summarise(total = paste("€", round(sum(Value)/1000, digits = 2), "B")) %>% pull(total)
                    )
                    
                  })
@@ -250,6 +250,76 @@ function(input, output, session) {
                  })
                  
                  
+                 output$league_besttactic <- renderPlot(width = "auto", {
+                   bestLeague <-
+                     md %>% filter(League %in% input$leagues)
+                     leagueTeam <- best_team(bestLeague, input = input$leaguetactic)
+                     
+                     
+                     pitch_custom <- list(
+                       length = 150,
+                       width = 100,
+                       penalty_box_length = 20,
+                       penalty_box_width = 50,
+                       six_yard_box_length = 8,
+                       six_yard_box_width = 26,
+                       penalty_spot_distance = 16,
+                       goal_width = 12,
+                       origin_x = 0,
+                       origin_y = 0
+                     )
+       
+                     if (input$leaguetactic == "4-2-3-1"){
+                       ggplot() +
+                         annotate_pitch(fill = "#038253", colour = "white", dimensions = pitch_custom) +
+                         annotate("text", x = 4, y = 50, label = leagueTeam$Name[leagueTeam$Position == "GK"])+
+                         annotate("text", x = 30, y = 12.5, label = leagueTeam$Name[leagueTeam$Position == "RB"])+
+                         annotate("text", x = 25, y = 34, label = leagueTeam$Name[leagueTeam$Position == "CB"][1])+
+                         annotate("text", x = 25, y = 67, label = leagueTeam$Name[leagueTeam$Position == "CB"][2])+
+                         annotate("text", x = 30, y = 87.5, label = leagueTeam$Name[leagueTeam$Position == "LB"])+
+                         annotate("text", x = 60, y = 65, label = leagueTeam$Name[leagueTeam$Position == "CM"][1])+
+                         annotate("text", x = 60, y = 35, label = leagueTeam$Name[leagueTeam$Position == "CM"][2])+
+                         annotate("text", x = 100, y = 50, label = leagueTeam$Name[leagueTeam$Position == "CAM"])+
+                         annotate("text", x = 110, y = 87.5, label = leagueTeam$Name[leagueTeam$Position == "LW"])+
+                         annotate("text", x = 110, y = 12.5, label = leagueTeam$Name[leagueTeam$Position == "RW"])+
+                         annotate("text", x = 125, y = 50, label = leagueTeam$Name[leagueTeam$Position == "CF"])+
+                         theme_pitch()
+                     } 
+                     else if(input$leaguetactic == "3-5-2"){
+                       ggplot() +
+                         annotate_pitch(fill = "#038253", colour = "white", dimensions = pitch_custom) +
+                         annotate("text", x = 4, y = 50, label = leagueTeam$Name[leagueTeam$Position == "GK"])+
+                         annotate("text", x = 25, y = 25, label = leagueTeam$Name[leagueTeam$Position == "CB"][1])+
+                         annotate("text", x = 25, y = 50, label = leagueTeam$Name[leagueTeam$Position == "CB"][2])+
+                         annotate("text", x = 25, y = 75, label = leagueTeam$Name[leagueTeam$Position == "CB"][3])+
+                         annotate("text", x = 85, y = 87.5, label = leagueTeam$Name[leagueTeam$Position == "LM"])+
+                         annotate("text", x = 70, y = 75, label = leagueTeam$Name[leagueTeam$Position == "CM"][1])+
+                         annotate("text", x = 70, y = 50, label = leagueTeam$Name[leagueTeam$Position == "CM"][2])+
+                         annotate("text", x = 70, y = 25, label = leagueTeam$Name[leagueTeam$Position == "CM"][3])+
+                         annotate("text", x = 85, y = 12.5, label = leagueTeam$Name[leagueTeam$Position == "RM"])+
+                         annotate("text", x = 135, y = 45, label = leagueTeam$Name[leagueTeam$Position == "ST"][1])+
+                         annotate("text", x = 135, y = 55, label = leagueTeam$Name[leagueTeam$Position == "ST"][2])+
+                         theme_pitch()
+                     }
+                     else{
+                       ggplot() +
+                         annotate_pitch(fill = "#038253", colour = "white", dimensions = pitch_custom) +
+                         annotate("text", x = 4, y = 50, label = leagueTeam$Name[leagueTeam$Position == "GK"])+
+                         annotate("text", x = 30, y = 12.5, label = leagueTeam$Name[leagueTeam$Position =="RB"])+
+                         annotate("text", x = 25, y = 34, label = leagueTeam$Name[leagueTeam$Position=="CB"][1])+
+                         annotate("text", x = 25, y = 67, label = leagueTeam$Name[leagueTeam$Position=="CB"][2])+
+                         annotate("text", x = 30, y = 87.5, label = leagueTeam$Name[leagueTeam$Position=="LB"])+
+                         annotate("text", x = 88, y = 65, label = leagueTeam$Name[leagueTeam$Position=="CM"][1])+
+                         annotate("text", x = 88, y = 37, label = leagueTeam$Name[leagueTeam$Position=="CM"][2])+
+                         annotate("text", x = 55, y = 50, label = leagueTeam$Name[leagueTeam$Position=="CDM"])+
+                         annotate("text", x = 125, y = 87.5, label = leagueTeam$Name[leagueTeam$Position=="LW"])+
+                         annotate("text", x = 125, y = 12.5, label = leagueTeam$Name[leagueTeam$Position=="RW"])+
+                         annotate("text", x = 135, y = 50, label = leagueTeam$Name[leagueTeam$Position=="ST"])+
+                         theme_pitch()
+                     }
+              
+
+                 })
                  
                  output$league_nat <-  renderPlotly({
                    world_map <- map_data("world")
@@ -332,7 +402,9 @@ function(input, output, session) {
                         scale_y_continuous(labels = c("0 €", "2 Billion €", "4 Billion €", "6 Billion €"))
                     )
                   }
-                  else if(input$comp_league == "Team"){
+                  else if(input$comp_league == "Team Total Value"){
+                    
+        
                     ggplotly(
                       md %>%
                         filter(League == input$leagues) %>% 
@@ -349,7 +421,7 @@ function(input, output, session) {
                     )
 
                   }
-                  else{
+                  else if(input$comp_league == "Position"){
                     ggplotly(
                       md %>%
                         filter(League %in% input$leagues) %>% 
@@ -365,7 +437,25 @@ function(input, output, session) {
                           labels = c("0 €", "0.5 Billion €", "1 Billion €", "1.5 Billion €", "2 Billion €"))
                     )
                   }
+                  else{
+                    ggplotly(
+                      md %>% 
+                        filter(League %in% input$leagues) %>%
+                        group_by(Club, Class) %>% 
+                        summarise(mean = mean(Overall)) %>% 
+                        ungroup() %>% 
+                        filter(Club %in% md$Club) %>% 
+                        ggplot(aes(reorder(Club, mean), mean, fill = Class))+
+                        geom_col(position = "fill")+
+                        geom_text(aes(label = round(mean,digits = 2)), position = position_fill(0.5))+
+                        coord_flip()+
+                        theme_minimal()+
+                        theme(legend.position = "top")+
+                        labs(x = NULL, y = NULL, title = "Team Overall for every position class")
+                    )
+                  }
                 })
+              
   
   
 }

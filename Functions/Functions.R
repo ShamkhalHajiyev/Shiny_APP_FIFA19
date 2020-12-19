@@ -12,7 +12,7 @@ best_team <- function(df, input) {
       "LB",
       "CM",
       "CM",
-      "AM",
+      "CAM",
       "LW",
       "RW",
       "CF")

@@ -106,31 +106,7 @@ rm(defence, midfielder)
 
 md$value_currency <- paste("€", md$Value, "M")
 md$wage_currency <- paste("€", md$Wage, "K")
-write.csv(md,'md.csv')
+
+write.csv(md,'.csv')
 
 
-
-a <- md %>%
-  filter(League == "La Liga" & Class == "Midfielder") %>%
-  arrange(-Value) %>%
-  mutate(Name = reorder(Name, Value)) %>% 
-  top_n(n = 10, wt = Value) %>%
-  ggplot(aes(
-    Value,
-    Name,
-    group = Class
-  )) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(Class ~ ., scales = "free") +
-  theme(
-    strip.background = element_rect(fill = "gray"),
-    strip.text.x = element_text(
-      size = 10,
-      colour = "white",
-      face = "bold.italic"
-    )
-  ) +
-  theme_minimal() + labs(title = "Most Valuable Players", x = "Million ???", y = NULL)
-
-ggplotly(a)
