@@ -317,7 +317,55 @@ function(input, output, session) {
                  
                })
   
-  
+                output$league_comp <- renderPlotly({
+                  if(input$comp_league == "League"){
+                    ggplotly(
+                      md %>% 
+                        group_by(League) %>% 
+                        summarise(Total.Value = sum(as.double(Value), na.rm = TRUE),
+                                  Average.Overall = mean(as.integer(Overall), na.rm = TRUE)) %>% 
+                        ggplot(aes(reorder(League, Total.Value), Total.Value, fill = Average.Overall))+
+                        geom_col(show.legend = F)+
+                        coord_flip()+
+                        theme_minimal()+ 
+                        labs(x = NULL, y = "League Total Value")+
+                        scale_y_continuous(labels = c("0 €", "2 Billion €", "4 Billion €", "6 Billion €"))
+                    )
+                  }
+                  else if(input$comp_league == "Team"){
+                    ggplotly(
+                      md %>%
+                        filter(League == input$leagues) %>% 
+                        group_by(Club) %>% 
+                        summarise(Total.Value = sum(as.double(Value), na.rm = TRUE),
+                                  Average.Overall = mean(as.integer(Overall), na.rm = TRUE)) %>% 
+                        ggplot(aes(reorder(Club, Total.Value), Total.Value, fill = Average.Overall))+
+                        geom_col(show.legend = F)+
+                        coord_flip()+
+                        theme_minimal()+
+                        labs(x = NULL, y = "Team Total Value") +
+                        scale_y_continuous(breaks = c(0,200,400,600,800),
+                                           labels = c("0 €", "200 Million €", "400 Million €", "600 Million €", "800 Million €"))
+                    )
+
+                  }
+                  else{
+                    ggplotly(
+                      md %>%
+                        filter(League %in% input$leagues) %>% 
+                        group_by(Class) %>%
+                        summarise(Total.Value = sum(as.double(Value), na.rm = TRUE),
+                                  Average.Overall = mean(as.integer(Overall), na.rm = TRUE)) %>% 
+                        ggplot(aes(reorder(Class, Total.Value), Total.Value, fill = Average.Overall))+
+                        geom_col(show.legend = F)+
+                        coord_flip()+
+                        theme_minimal()+
+                        labs(x = NULL, y = "Position Total Value") + 
+                        scale_y_continuous(breaks = c(0,500,1000,1500,2000),
+                          labels = c("0 €", "0.5 Billion €", "1 Billion €", "1.5 Billion €", "2 Billion €"))
+                    )
+                  }
+                })
   
   
 }
