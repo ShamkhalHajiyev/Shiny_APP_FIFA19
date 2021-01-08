@@ -107,6 +107,7 @@ rm(defence, midfielder)
 md$value_currency <- paste("€", md$Value, "M")
 md$wage_currency <- paste("€", md$Wage, "K")
 
-write.csv(md,'.csv')
+write.csv(md,'./Data/md.csv')
 
 
+md <- read.csv("Data/md.csv", sep = ",")

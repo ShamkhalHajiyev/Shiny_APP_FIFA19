@@ -1,0 +1,1 @@
+To run the app, open the UI.R and Server.R files together. 

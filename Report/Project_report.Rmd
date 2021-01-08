@@ -1,0 +1,642 @@
+---
+title: "FIFA-19 Visualization! Report"
+author: "Rezart Abazi (425977) & Shamkhal Hajiyev (425991)"
+date: "1/8/2021"
+output: html_document
+---
+
+
+# Introduction
+
+In order to create user selective visualization, we decided to make a Shiny App. The project folder consisted several files and folders such as ui.R, server.R, Data, Functions, Libraries, and Global folders.
+In Data folder, we have original and modified datasets, in Libraries folder, we have script which describes which libraries are used in app, there is functions.R script in Functions folder that app imports the used functions from that file. The file in Global folder which is Global.R shows the modification in dataset and saves modified data in Data folder.
+
+The main idea is to compare teams and players stats inside the main leagues of Europe where the most skilled and well know players are playing. After some considerations of data relevance and to make this project more interesting for the people who are going to take a look in it we decided to exclude some of the leagues where the performance and players popularity was not so high as we expected.
+
+Note: Some codes are disabled please check the code scipts or Report/Project_report.RMD to see all the codes.
+
+
+# Libraries
+
+
+
+```{r libraries, eval= F,  echo=T}
+#shiny libraries
+suppressMessages(library(shiny))
+suppressMessages(library(shinydashboard))
+suppressMessages(library(shinydashboardPlus))
+suppressMessages(library(shinyWidgets))
+suppressMessages(library(shinyalert))
+suppressMessages(library(shinycssloaders))
+suppressMessages(library(shinyjs))
+suppressMessages(library(shinyBS))
+
+#shiny data table & charting libraries
+suppressMessages(library(DT))
+suppressMessages(library(plotly))
+suppressMessages(library(ggdendro))
+suppressMessages(library(factoextra))
+suppressMessages(library(maps))
+
+#tidyverse libraries
+suppressMessages(library(tidyverse))
+suppressMessages(library(stringr))
+suppressMessages(library(magrittr))
+suppressMessages(library(ggrepel))
+suppressMessages(library(gridExtra))
+suppressMessages(library(psych))
+suppressMessages(library(scales))
+suppressMessages(library(ggpubr))
+suppressMessages(library(magick))
+
+#others
+suppressMessages(library(rsconnect))
+suppressMessages(library(rmarkdown))
+suppressMessages(library(ggsoccer))
+
+```
+
+
+# Data & Modifications
+
+There are 89 columns and 18207 observations on original data. You can go More then click the data and choose Original or Modifed version to view the datasets. 
+
+The file global shows the all manipulation we did in data, we will show the main things. We created the leagues and modified some variables.
+To not take additional space we are adding the codes here but disable to shown in Markdown. To see the codes please open the Markdown file or go to Global/Global.R script. After editing we kept 84 columns and 2241 observations on data. We removed the players whose value is less than 1 Million Euro. At the end we are going to deal with the Ligue 1 from France, Serie A from Italy, La Liga from Spain, Premier League from England and the finally, Bundesliga from Germany.
+The dataset includes latest edition FIFA 2019 players attributes like Age, Nationality, Overall, Potential,
+Club, Value, Wage, Preferred Foot, International Reputation, Weak Foot, Skill Moves, Work Rate, Position, Jersey Number, Joined, Loaned From, Contract Valid Until, Height, Weight, LS, ST, RS, LW, LF, CF, RF, RW, LAM, CAM, RAM, LM, LCM, CM, RCM, RM, LWB, LDM, CDM, RDM, RWB, LB, LCB, CB, RCB, RB, Crossing, Finishing, Heading, Accuracy, Short Passing, Volleys, Dribbling, Curve, FK Accuracy, Long Passing, Ball Control, Acceleration, Sprint Speed, Agility, Reactions, Balance, Shot Power, Jumping, Stamina, Strength, Long Shots, Aggression, Interceptions, Positioning, Vision, Penalties, Composure, Marking, Standing Tackle, Sliding Tackle, GK Diving, GK Handling, GK Kicking, GK Positioning, GK, Reflexes, and Release Clause.
+
+
+```{r eval=FALSE, include=FALSE}
+
+###Data
+fifa19 <- read.csv2("C:/Users/hajiy/Desktop/Fifa_19_Project/Data/fifa2019.csv", sep  = ",")
+row.has.na <- apply(fifa19, 1, function(x){any(is.na(x))})
+md <- fifa19[!row.has.na,]
+
+
+### Creating the Leagues
+
+bundesliga <- c(
+  "1. FC NÃ¼rnberg", "1. FSV Mainz 05", "Bayer 04 Leverkusen", "FC Bayern MÃ¼nchen",
+  "Borussia Dortmund", "Borussia MÃ¶nchengladbach", "Eintracht Frankfurt",
+  "FC Augsburg", "FC Schalke 04", "Fortuna DÃ¼sseldorf", "Hannover 96",
+  "Hertha BSC", "RB Leipzig", "SC Freiburg", "TSG 1899 Hoffenheim",
+  "VfB Stuttgart", "VfL Wolfsburg", "SV Werder Bremen"
+)
+
+premierLeague <- c(
+  "Arsenal", "Bournemouth", "Brighton & Hove Albion", "Burnley",
+  "Cardiff City", "Chelsea", "Crystal Palace", "Everton", "Fulham",
+  "Huddersfield Town", "Leicester City", "Liverpool", "Manchester City",
+  "Manchester United", "Newcastle United", "Southampton", 
+  "Tottenham Hotspur", "Watford", "West Ham United", "Wolverhampton Wanderers"
+  
+)
+
+laliga <- c(
+  "Athletic Club de Bilbao", "AtlÃ©tico Madrid", "CD LeganÃ©s",
+  "Deportivo AlavÃ©s", "FC Barcelona", "Getafe CF", "Girona FC", 
+  "Levante UD", "Rayo Vallecano", "RC Celta", "RCD Espanyol", 
+  "Real Betis", "Real Madrid", "Real Sociedad", "Real Valladolid CF",
+  "SD Eibar", "SD Huesca", "Sevilla FC", "Valencia CF", "Villarreal CF"
+)
+
+seriea <- c(
+  "Atalanta","Bologna","Cagliari","Chievo Verona","Empoli", "Fiorentina","Frosinone","Genoa",
+  "Inter","Juventus","Lazio","Milan","Napoli","Parma","Roma","Sampdoria","Sassuolo","SPAL",
+  "Torino","Udinese"
+  
+)
+
+
+ligue1 <- c(
+  "Amiens SC", "Angers SCO", "AS Monaco", "AS Saint-Ãtienne", "Dijon FCO", "En Avant de Guingamp",
+  "FC Nantes", "FC Girondins de Bordeaux", "LOSC Lille", "Montpellier HSC", "NÃ®mes Olympique", 
+  "OGC Nice", "Olympique Lyonnais","Olympique de Marseille", "Paris Saint-Germain", 
+  "RC Strasbourg Alsace", "Stade Malherbe Caen", "Stade de Reims", "Stade Rennais FC", "Toulouse Football Club"
+)
+
+
+
+md %<>% mutate(
+  League = case_when(
+    Club %in% bundesliga ~ "Bundesliga",
+    Club %in% premierLeague ~ "Premier League",
+    Club %in% laliga ~ "La Liga",
+    Club %in% seriea ~ "Serie A",
+    Club %in% ligue1 ~ "Ligue 1",
+  ),
+  Country = case_when(
+    League == "Bundesliga" ~ "Germany",
+    League == "Premier League" ~ "UK",
+    League == "La Liga" ~ "Spain",
+    League == "Serie A" ~ "Italy",
+    League == "Ligue 1" ~ "France",
+  )
+) %>% filter(!is.na(League)) %>% mutate_if(is.factor, as.character)
+
+
+rm(bundesliga, premierLeague, laliga, seriea, ligue1, row.has.na)
+
+
+
+### columns to drop 
+
+md %<>% select(-ID, -Body.Type, -Real.Face, -Joined, -Loaned.From, -Photo, -Flag, -Special, -Work.Rate, -Club.Logo, -Release.Clause)
+
+
+
+
+### Height and Weight variables convert cm and kg units.
+
+md %<>%
+  mutate(Height = round((as.numeric(str_sub(Height, start=1,end = 1))*30.48) + (as.numeric(str_sub(Height, start = 3, end = 5))* 2.54)),
+         Weight = round(as.numeric(str_sub(Weight, start = 1, end = 3)) / 2.204623))
+
+### Correction of the Preferred Foot Variable.
+
+md %<>% filter(Preferred.Foot %in% c("Left", "Right")) 
+md$Preferred.Foot <- as.factor(as.character(md$Preferred.Foot))
+md <- md[!grepl("K", md$Value),]
+md$Value <- as.numeric(unlist(regmatches(md$Value, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",md$Value)))) 
+md <- md[md$Value >= 1, ]
+md$Wage <- as.numeric(unlist(regmatches(md$Wage, gregexpr("[[:digit:]]+\\.*[[:digit:]]*",md$Wage)))) 
+
+
+# Create Position Class #
+defence <- c("CB", "RB", "LB", "LWB", "RWB", "LCB", "RCB")
+midfielder <- c("CM", "CDM","CAM","LM","RM", "LAM", "RAM", "LCM", "RCM", "LDM", "RDM")
+
+md %<>% mutate(Class = if_else(Position %in% "GK", "Goal Keeper",
+                                 if_else(Position %in% defence, "Defender",
+                                         if_else(Position %in% midfielder, "Midfielder", "Forward"))))
+
+rm(defence, midfielder)
+
+md$value_currency <- paste("â¬", md$Value, "M")
+md$wage_currency <- paste("â¬", md$Wage, "K")
+
+write.csv(md,'./Data/md.csv')
+
+
+md <- read.csv("Data/md.csv", sep = ",")
+
+```
+
+# Functions 
+
+To make the file more understandable we created special functions.R and added there 2 functions. "best_team" and "facetReactiveBar". The explanation will be below. Please, continue to read.
+
+```{r eval= F,  echo=T}
+best_team <- function(df, input) {
+  team <- NULL
+  team <- tibble()
+  team_copy <-
+    df %>% select(Jersey.Number, Name, Overall, Position, Club) %>% arrange(-Overall)
+  
+  tac4231 <-
+    c("GK",
+      "RB",
+      "CB",
+      "CB",
+      "LB",
+      "CM",
+      "CM",
+      "CAM",
+      "LW",
+      "RW",
+      "CF")
+  tac352 <-
+    c("GK",
+      "CB",
+      "CB",
+      "CB",
+      "RM",
+      "CM",
+      "CM",
+      "CM",
+      "LM",
+      "ST",
+      "ST")
+  tac433 <-
+    c("GK",
+      "RB",
+      "CB",
+      "CB",
+      "LB",
+      "CM",
+      "CDM",
+      "CM",
+      "LW",
+      "RW",
+      "ST")
+  
+  tactic <- if (input == "4-2-3-1") {
+    tac4231
+  } else if (input == "3-5-2") {
+    tac352
+  } else{
+    tac433
+  }
+  
+  for (i in tactic) {
+    team %<>%  bind_rows(team_copy %>% filter(Position %in% i) %>% head(1))
+    team_copy %<>% filter(!Name %in% (team %>% pull(Name)))
+    
+  }
+  
+  return(team)
+  
+}
+
+facetReactiveBar = function(df, fill_variable, fill_strip) {
+  res <- NULL
+  
+  if (missing("df") |
+      missing("fill_variable") | missing("fill_strip"))
+    return(res)
+  if (is.null(df) |
+      is.null(fill_variable) | is.null("fill_strip"))
+    return(res)
+  
+  
+  res <- df %>%
+    select(Name, Crossing:SlidingTackle) %>%
+    rename_all(funs(gsub("[[:punct:]]", " ", .))) %>%
+    gather(Exp, Skill, Crossing:`SlidingTackle`,-`Name`) %>%
+    ggplot(aes(Exp, Skill)) +
+    geom_col(fill = fill_variable) +
+    facet_wrap( ~ (df %>% pull(`Name`))) +
+    labs(x = NULL, y = NULL) +
+    theme(
+      strip.background = element_rect(fill = fill_strip, color = "black"),
+      strip.text.x = element_text(
+        size = 10,
+        colour = "white",
+        face = "bold.italic"
+      ),
+      axis.text.x = element_text(angle = 90)
+    )
+  
+  return(res)
+  
+}
+```
+
+# Data Analysis and Visualization 
+
+
+Instead of real visualization, we decided to give explanation here per tab we created. You can access them by following our instructions.
+
+Our first tab is called 'Compare Players' and as you can understand the purpose of the first tab is to make a comparison between 2 various players. We ask user to filter his/her searching by selecting League, Team, Players in specific 'selectinputs', and compare their skills in the spider diagram which is called "Radar" sub-tab. This spider illustrates the main skills of players and all important additional information about player is just added below of each player column. In "Histogram" sub-tab helps us to compare all the abilities of each players in 2 bar plots. The function "facetReactiveBar" mentioned above makes our work easier. By the help of 1 one function we created 2 bar plots for each players. 
+
+The Second tab is called 'League Stats' which help user to make a comparison between the five leagues. In top-left corner user should select a league which he wants to display. In top-right corner "Total value of league", "Total Number of Players" and "Total Number of Clubs" are mentioned about the league. In bottom-left you can see 3 various tactics. By the help of "best_team" function, we created special tactics which finds the best players in the league clubs and displays their position in football yard graph. 
+```{r eval= F,  echo=T}
+bestLeague <-
+  md %>% filter(League %in% input$leagues)
+leagueTeam <-
+  best_team(bestLeague, input = input$leaguetactic)
+
+
+pitch_custom <- list(
+  length = 150,
+  width = 100,
+  penalty_box_length = 20,
+  penalty_box_width = 50,
+  six_yard_box_length = 8,
+  six_yard_box_width = 26,
+  penalty_spot_distance = 16,
+  goal_width = 12,
+  origin_x = 0,
+  origin_y = 0
+)
+
+if (input$leaguetactic == "4-2-3-1") {
+  ggplot() +
+    annotate_pitch(fill = "#038253",
+                   colour = "white",
+                   dimensions = pitch_custom) +
+    annotate("text",
+             x = 4,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "GK"]) +
+    annotate("text",
+             x = 30,
+             y = 12.5,
+             label = leagueTeam$Name[leagueTeam$Position == "RB"]) +
+    annotate("text",
+             x = 25,
+             y = 34,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][1]) +
+    annotate("text",
+             x = 25,
+             y = 67,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][2]) +
+    annotate("text",
+             x = 30,
+             y = 87.5,
+             label = leagueTeam$Name[leagueTeam$Position == "LB"]) +
+    annotate("text",
+             x = 60,
+             y = 65,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][1]) +
+    annotate("text",
+             x = 60,
+             y = 35,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][2]) +
+    annotate("text",
+             x = 100,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "CAM"]) +
+    annotate("text",
+             x = 110,
+             y = 87.5,
+             label = leagueTeam$Name[leagueTeam$Position == "LW"]) +
+    annotate("text",
+             x = 110,
+             y = 12.5,
+             label = leagueTeam$Name[leagueTeam$Position == "RW"]) +
+    annotate("text",
+             x = 125,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "CF"]) +
+    theme_pitch()
+}
+else if (input$leaguetactic == "3-5-2") {
+  ggplot() +
+    annotate_pitch(fill = "#038253",
+                   colour = "white",
+                   dimensions = pitch_custom) +
+    annotate("text",
+             x = 4,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "GK"]) +
+    annotate("text",
+             x = 25,
+             y = 25,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][1]) +
+    annotate("text",
+             x = 25,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][2]) +
+    annotate("text",
+             x = 25,
+             y = 75,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][3]) +
+    annotate("text",
+             x = 85,
+             y = 87.5,
+             label = leagueTeam$Name[leagueTeam$Position == "LM"]) +
+    annotate("text",
+             x = 70,
+             y = 75,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][1]) +
+    annotate("text",
+             x = 70,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][2]) +
+    annotate("text",
+             x = 70,
+             y = 25,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][3]) +
+    annotate("text",
+             x = 85,
+             y = 12.5,
+             label = leagueTeam$Name[leagueTeam$Position == "RM"]) +
+    annotate("text",
+             x = 135,
+             y = 45,
+             label = leagueTeam$Name[leagueTeam$Position == "ST"][1]) +
+    annotate("text",
+             x = 135,
+             y = 55,
+             label = leagueTeam$Name[leagueTeam$Position == "ST"][2]) +
+    theme_pitch()
+}
+else{
+  ggplot() +
+    annotate_pitch(fill = "#038253",
+                   colour = "white",
+                   dimensions = pitch_custom) +
+    annotate("text",
+             x = 4,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "GK"]) +
+    annotate("text",
+             x = 30,
+             y = 12.5,
+             label = leagueTeam$Name[leagueTeam$Position == "RB"]) +
+    annotate("text",
+             x = 25,
+             y = 34,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][1]) +
+    annotate("text",
+             x = 25,
+             y = 67,
+             label = leagueTeam$Name[leagueTeam$Position == "CB"][2]) +
+    annotate("text",
+             x = 30,
+             y = 87.5,
+             label = leagueTeam$Name[leagueTeam$Position == "LB"]) +
+    annotate("text",
+             x = 88,
+             y = 65,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][1]) +
+    annotate("text",
+             x = 88,
+             y = 37,
+             label = leagueTeam$Name[leagueTeam$Position == "CM"][2]) +
+    annotate("text",
+             x = 55,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "CDM"]) +
+    annotate("text",
+             x = 125,
+             y = 87.5,
+             label = leagueTeam$Name[leagueTeam$Position == "LW"]) +
+    annotate("text",
+             x = 125,
+             y = 12.5,
+             label = leagueTeam$Name[leagueTeam$Position == "RW"]) +
+    annotate("text",
+             x = 135,
+             y = 50,
+             label = leagueTeam$Name[leagueTeam$Position == "ST"]) +
+    theme_pitch()
+}
+```
+
+In this tab, user has additional 3 sub-tabs "Nationality", "Players", "Comparison".
+
+"Nationality" is consisted Interactive World Map with information of Number of Players in each country for selected league. ggplot2 package helps to plot world map. But ggplot does not provide interactive visuals. There is a function in the plotly package to plot interactive visuals for ggplot. This function is ggplotly function. 
+
+```{r eval= F,  echo=T}
+world_map <- map_data("world")
+
+numofplayers <- world_map %>%
+  mutate(region = as.character(region)) %>%
+  rename(Country = region) %>%
+  left_join((
+    md %>% mutate(
+      Nationality = as.character(Nationality),
+      Nationality = if_else(Nationality %in% "England", "UK", Nationality)
+    ) %>%
+      filter(League == input$leagues) %>%
+      count(Nationality, name = "Number of Player") %>%
+      rename(Country = Nationality) %>%
+      mutate(Country = as.character(Country))
+  ),
+  by = "Country")
+
+ggplotly(
+  ggplot(numofplayers, aes(long, lat, group = group)) +
+    geom_polygon(
+      aes(label = `Country`, fill = `Number of Player`),
+      color = "white",
+      show.legend = FALSE
+    ) +
+    scale_fill_viridis_c(option = "C") +
+    theme_void() +
+    labs(fill = "Number of Players:",
+         title = "Nationality of The Players in The League")
+)
+```
+
+In "Players" sub-tab user see best 20 players for class and he/she has a chance to filter the positions. The map is interactive and the size of circles are depends on overall skills of players. 
+
+```{r eval= F,  echo=T}
+md_league_players <- md %>%
+  filter(League %in% input$leagues &
+           Class %in% input$leagueclass) %>%
+  mutate(Name = reorder(Name, Value)) %>%
+  group_by(Class) %>%
+  top_n(n = 20, wt = Value)
+
+ggplotly(
+  ggplot(
+    md_league_players,
+    aes(Value,
+        Name,
+        size = Overall,
+        color = Position)
+  ) +
+    geom_point() +
+    facet_wrap(Class ~ ., scales = "free") +
+    theme(
+      strip.background = element_rect(fill = "gray"),
+      strip.text.x = element_text(
+        size = 10,
+        colour = "white",
+        face = "bold.italic"
+      )
+    ) +
+    theme_minimal() + labs(title = "Most Valuable Players", x = "Million â¬", y = NULL)
+)
+```
+
+The last sub-tab is "Comparison". Here user can vary the leagues or teams, or the class of players based on total values. The last graph shows team overall for every position in class.
+
+
+```{r eval= F,  echo=T}
+if (input$comp_league == "League") {
+  ggplotly(
+    md %>%
+      group_by(League) %>%
+      summarise(
+        Total.Value = sum(as.double(Value), na.rm = TRUE),
+        Average.Overall = mean(as.integer(Overall), na.rm = TRUE)
+      ) %>%
+      ggplot(aes(
+        reorder(League, Total.Value), Total.Value, fill = Average.Overall
+      )) +
+      geom_col(show.legend = F) +
+      coord_flip() +
+      theme_minimal() +
+      labs(x = NULL, y = "League Total Value") +
+      scale_y_continuous(
+        labels = c("0 â¬", "2 Billion â¬", "4 Billion â¬", "6 Billion â¬")
+      )
+  )
+}
+else if (input$comp_league == "Team Total Value") {
+  ggplotly(
+    md %>%
+      filter(League == input$leagues) %>%
+      group_by(Club) %>%
+      summarise(
+        Total.Value = sum(as.double(Value), na.rm = TRUE),
+        Average.Overall = mean(as.integer(Overall), na.rm = TRUE)
+      ) %>%
+      ggplot(aes(
+        reorder(Club, Total.Value), Total.Value, fill = Average.Overall
+      )) +
+      geom_col(show.legend = F) +
+      coord_flip() +
+      theme_minimal() +
+      labs(x = NULL, y = "Team Total Value") +
+      scale_y_continuous(
+        breaks = c(0, 200, 400, 600, 800),
+        labels = c(
+          "0 â¬",
+          "200 Million â¬",
+          "400 Million â¬",
+          "600 Million â¬",
+          "800 Million â¬"
+        )
+      )
+  )
+  
+}
+else if (input$comp_league == "Position") {
+  ggplotly(
+    md %>%
+      filter(League %in% input$leagues) %>%
+      group_by(Class) %>%
+      summarise(
+        Total.Value = sum(as.double(Value), na.rm = TRUE),
+        Average.Overall = mean(as.integer(Overall), na.rm = TRUE)
+      ) %>%
+      ggplot(aes(
+        reorder(Class, Total.Value), Total.Value, fill = Average.Overall
+      )) +
+      geom_col(show.legend = F) +
+      coord_flip() +
+      theme_minimal() +
+      labs(x = NULL, y = "Position Total Value") +
+      scale_y_continuous(
+        breaks = c(0, 500, 1000, 1500, 2000),
+        labels = c(
+          "0 â¬",
+          "0.5 Billion â¬",
+          "1 Billion â¬",
+          "1.5 Billion â¬",
+          "2 Billion â¬"
+        )
+      )
+  )
+}
+else{
+  ggplotly(
+    md %>%
+      filter(League %in% input$leagues) %>%
+      group_by(Club, Class) %>%
+      summarise(mean = mean(Overall)) %>%
+      ungroup() %>%
+      filter(Club %in% md$Club) %>%
+      ggplot(aes(reorder(Club, mean), mean, fill = Class)) +
+      geom_col(position = "fill") +
+      geom_text(aes(label = round(mean, digits = 2)), position = position_fill(0.5)) +
+      coord_flip() +
+      theme_minimal() +
+      theme(legend.position = "top") +
+      labs(x = NULL, y = NULL, title = "Team Overall for every position class")
+  )
+}
+```
+
+
+In More section you can find this report imported to app and see the datasets as we mentioned in Data paraghraph.
+
+
+

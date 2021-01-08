@@ -1,13 +1,11 @@
-source("Global/Global1.R")
-
 source("Libraries/Library.R")
-
+source("Global/Global.R")
 source("Functions/Functions.R")
 
 
 shinyUI(fluidPage(
     navbarPage(
-        "FIFA Visualization!",
+        "FIFA-19 Visualization!",
         tabPanel("Compare Players",
                  fluidRow(
                      column(
@@ -152,9 +150,13 @@ shinyUI(fluidPage(
         ),
         navbarMenu(
             "More",
-            tabPanel("Developers",
+            tabPanel("Data",
+                     tags$br(),
+                     pickerInput("Dataset", choices = c("Original", "Modified")),
+                     tags$br(),
                      DT::dataTableOutput("table")),
-            tabPanel("Report")
+            tabPanel("Report",
+                     includeMarkdown("Report/Project_report.Rmd"))
         )
     )
     

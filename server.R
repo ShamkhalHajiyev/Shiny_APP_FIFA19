@@ -455,7 +455,15 @@ function(input, output, session) {
                     )
                   }
                 })
-              
+                output$table = DT::renderDataTable({
+                  if(input$Dataset == "Original"){
+                    fifa19
+                  }
+                  else{
+                    md %>% 
+                      select(-1)
+                  }
+                })
   
   
 }

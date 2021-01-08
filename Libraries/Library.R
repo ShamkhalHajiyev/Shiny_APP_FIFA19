@@ -28,4 +28,4 @@ suppressMessages(library(magick))
 
 suppressMessages(library(rsconnect))
 suppressMessages(library(rmarkdown))
-
+suppressMessages(library(ggsoccer))

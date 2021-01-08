@@ -1,1 +1,0 @@
-md <- read.csv("md.csv", sep = ",")
