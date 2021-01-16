@@ -1,6 +1,6 @@
 
 ###Data
-fifa19 <- read.csv2("C:/Users/hajiy/Desktop/Fifa_19_Project/Data/fifa2019.csv", sep  = ",")
+fifa19 <- read.csv2("./Data/fifa2019.csv", sep  = ",")
 row.has.na <- apply(fifa19, 1, function(x){any(is.na(x))})
 md <- fifa19[!row.has.na,]
 

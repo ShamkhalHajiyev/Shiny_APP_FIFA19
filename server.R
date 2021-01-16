@@ -1,4 +1,4 @@
-function(input, output, session) {
+  function(input, output, session) {
   ########## Compare Players
   observeEvent(input$league1, {
     clubs1 <- md %>%

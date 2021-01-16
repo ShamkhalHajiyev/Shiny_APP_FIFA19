@@ -1,5 +1,5 @@
 ---
-title: "FIFA-19 Visualization! Report"
+title: "FIFA-19 Visualization Report!"
 author: "Rezart Abazi (425977) & Shamkhal Hajiyev (425991)"
 date: "1/8/2021"
 output: html_document
