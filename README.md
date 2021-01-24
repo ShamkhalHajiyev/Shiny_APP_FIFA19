@@ -1,1 +1,1 @@
-# This project is University Class Project. Purpose here to apply different visualization techniques in R with Shiny App.
+# This project is University Class Project. Purpose here to apply different visualization techniques in R with Shiny App. To run the application please open the ui.R and server.R files, application autamatically install required packages. The data used for visualization is FIFA19 dataset which is taken from Kaggle.com
